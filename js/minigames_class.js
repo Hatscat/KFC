@@ -1,17 +1,21 @@
 /* --------------------------------- Minigames Class --------------------------------- */
 
-var Shifumi = function(imgNb) {
+var Shifumi = function(img) {
 
-	this.img = globalVar.aImagesMinigames[imgNb];
-	this.iSigneCheval = Math.floor(Math.random() * 3 + 1);
+	this.img = img;
+
+	this.sw = this.img.width;
+	this.sh = this.img.height;
+
+	this.iSigneCheval = 0;
 	this.iPlayerSign = 0;
 	this.iState = 0;
 
-	this.pierre_rect = [20 * globalVar.iEchelle, 20 * globalVar.iEchelle, 100 * globalVar.iEchelle, 30 * globalVar.iEchelle];
-	this.feuille_rect = [220 * globalVar.iEchelle, 20 * globalVar.iEchelle, 100 * globalVar.iEchelle, 30 * globalVar.iEchelle];
-	this.ciseaux_rect = [160 * globalVar.iEchelle, 220 * globalVar.iEchelle, 100 * globalVar.iEchelle, 30 * globalVar.iEchelle];
+	this.pierre_rect = [20 * globalVar.iScale, 20 * globalVar.iScale, 100 * globalVar.iScale, 30 * globalVar.iScale];
+	this.feuille_rect = [220 * globalVar.iScale, 20 * globalVar.iScale, 100 * globalVar.iScale, 30 * globalVar.iScale];
+	this.ciseaux_rect = [160 * globalVar.iScale, 220 * globalVar.iScale, 100 * globalVar.iScale, 30 * globalVar.iScale];
 
-	function run()
+	this.draw = function()
 	{
 		console.log("shifumi!!");
 		
@@ -54,12 +58,9 @@ var Shifumi = function(imgNb) {
 			}
 			
 		}
-	}
 
-	function draw()
-	{
 		globalVar.context.globalAlpha = 1;
-		globalVar.context.drawImage(this.img, 0, 0, 1280, 720, 0, 0, globalVar.iCanvas_w, globalVar.iCanvas_h);
+		globalVar.context.drawImage(this.img, 0, 0, this.sw, this.sh, 0, 0, globalVar.iCanvas_w, globalVar.iCanvas_h);
 	}
 
 }

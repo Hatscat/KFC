@@ -1,66 +1,131 @@
 /* --------------------------------- requestAnimFrame --------------------------------- */
 
 window.requestAnimFrame = (
-		function()
+	function()
+	{
+		return	window.requestAnimationFrame ||
+		window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame    ||
+		window.oRequestAnimationFrame      ||
+		window.msRequestAnimationFrame     ||
+		function(callback, element)
 		{
-			return	window.requestAnimationFrame ||
-			window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame    ||
-			window.oRequestAnimationFrame      ||
-			window.msRequestAnimationFrame     ||
-			function(callback, element)
-			{
-				window.setTimeout(callback, 1000 / 60);
-			};
-		}
+			window.setTimeout(callback, 1000 / 60);
+		};
+	}
 )();
 
 /* --------------------------------- Global variables --------------------------------- */
 
 var globalVar = {
 		
-		context: null,
-		canvas: null, /*modif max 11h07*/
-		drawPath: [], /*modif max 11h10*/
-		aImagesPj: [],
-		aImagesPnj: [],
-		aImagesScenes: [],
-		aImagesMinigames: [],  /* new */
-		aImagesContent: [],
-		aAudio: [],
-		aScene: [],
-		aInventoryContent: [],
-		aSceneContent: [],
-		aPnj: [],
-		iFrame: 0,
-		iSceneNb: 0,
-		iCanvas_w: 0,
-		iCanvas_h: 0,
-		filesLoaded: 0,
-		iEchelle: 5,
-		iSceneChangementState:0,
+	context: null,
+	canvas: null,
 
-		iMouse_x: 0,
-		iMouse_y: 0,
-		bMouseDown: false,
-		bFingerSlide: false,
-		aFingerTouch: [],
-		
-		oDave: null,
-		oScript: null, /* modified */
-		iHistoryState: 0, /*modified*/
-		oShifumi: null, /* new */
-		bMinigames: false, /* new */
-		iMinigamesId: 0, /* new */
-		bPause: false
+	oDave: null,
+	oShifumi: null,
+
+	iFilesLoaded: 0,
+	iFrame: 0,
+	iSceneNb: 0,
+	iCanvas_w: 0,
+	iCanvas_h: 0,
+	iScale: 1,
+	iMouse_x: 0,
+	iMouse_y: 0,
+	iMinigamesId: 0,
+	iHistoryState: 0,
+	iSceneChangementState: 0,
+
+	bMouseDown: false,
+	bCanClick: true,
+	bFingerSlide: false,
+	bMinigames: false,
+	bPause: false,
+
+	// drawPath: [],
+	aImg_Pj: [],
+	aImg_Pnj: [],
+	aImg_Bg: [],
+	aImg_Minigames: [],
+	aImg_SceneContent: [],
+	aAudio: [],
+	aScene: [],
+	aInventoryContent: [],
+	aSceneContent: [],
+	aPnj: [],
+	aFingerTouch: []
+};
+
+/* --------------------------------- Global Functions --------------------------------- */
+
+var globalFunc = {
+
+	loadImage: function (sImageSrc)
+	{
+		var img = new Image();
+		img.onload = globalFunc.isLoadedContent;
+		img.src = sImageSrc;
+		return img;
+	},
+
+	loadAudio: function (sAudioSrc)
+	{
+		var audio = new Audio();
+		audio.addEventListener("canplaythrough", globalFunc.isLoadedContent, false);
+		audio.src = sAudioSrc;
+		return audio;
+	},
+
+	isLoadedContent: function ()
+	{
+		if (++globalVar.iFilesLoaded
+			>= (globalVar.aImg_Pj.length
+			+	globalVar.aImg_Pnj.length
+			+	globalVar.aImg_Bg.length
+			+	globalVar.aImg_Minigames.length
+			+	globalVar.aImg_SceneContent.length
+			+	globalVar.aAudio.length))
+		{
+			run();
+		}
+	},
+
+	collision: function (box1, box2)
+	{
+		if ((box1[0] >= box2[0] + box2[2])
+		|| (box1[0] + box1[2] <= box2[0])
+		|| (box1[1] >= box2[1] + box2[3])
+		|| (box1[1] + box1[3] <= box2[1]))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	},
+
+	isButtonClicked: function (xywh)
+	{
+		if ((globalVar.bMouseDown && globalVar.iMouse_x >= xywh[0] && globalVar.iMouse_x < xywh[0] + xywh[2])
+		&& (globalVar.iMouse_y >= xywh[1] && globalVar.iMouse_y < xywh[1] + xywh[3]))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 };
 
 /* --------------------------------- Window Events --------------------------------- */
 
 window.onresize = function()
 {
-	globalVar.iCanvas_w = canvas.width = 1280;/*window.innerWidth;*/
-	globalVar.iCanvas_h = canvas.height = 720;/*window.innerHeight;*/
+	globalVar.iCanvas_w = canvas.width = globalVar.aImg_Bg[0].width * globalVar.iScale;
+	globalVar.iCanvas_h = canvas.height = globalVar.aImg_Bg[0].height * globalVar.iScale;
 }
 
 window.onmousemove = function(event)
@@ -77,9 +142,21 @@ window.onmousedown = function(event)
 window.onmouseup = function(event)
 {
 	globalVar.bMouseDown = false;
+	globalVar.bCanClick = true;
 }
 
-/* --------------------------------- touch events feature --------------------------------- */
+/* --------------------------------- Keyboard Events --------------------------------- */
+
+window.onkeydown = function(event)
+{
+	if (event.keyCode == 32) /* space button */
+	{
+		globalVar.bPause = !globalVar.bPause;
+		run();
+	}	
+}
+
+/* --------------------------------- Touch Events --------------------------------- */
 
 function drawPathSeting(idx) {
     for (var i = 0;i < drawPath.length;i++) {
@@ -137,64 +214,73 @@ function touchEndHandler()
 
 window.onload = function()
 {
-	var canvas = document.getElementById("canvas");
-	globalVar.context = canvas.getContext("2d");
+	/* ****** chargement des images et des sons ****** */
 
-	globalVar.aImagesScenes[0] = loadImage("img/taverne.png"); /* le bg de la scene 1 */
-	globalVar.aImagesScenes[1] = loadImage("img/grange.png"); /* le bg de la scene 2 */
-	globalVar.aImagesScenes[2] = loadImage("img/place.png"); /* scene 3 */
-	globalVar.aImagesScenes[3] = loadImage("img/forge.png"); /* scene 4 */ 
-	globalVar.aImagesScenes[4] = loadImage("img/chateau.png"); /* scene 5 */
+	globalVar.aImg_Bg[0] = globalFunc.loadImage("img/taverne.png"); /* le bg de la scene 1 */
+	globalVar.aImg_Bg[1] = globalFunc.loadImage("img/grange.png"); /* le bg de la scene 2 */
+	globalVar.aImg_Bg[2] = globalFunc.loadImage("img/place.png"); /* scene 3 */
+	globalVar.aImg_Bg[3] = globalFunc.loadImage("img/forge.png"); /* scene 4 */ 
+	globalVar.aImg_Bg[4] = globalFunc.loadImage("img/chateau.png"); /* scene 5 */
 
-	globalVar.aImagesPj[0] = loadImage("img/daveR.png"); /* le player de droite */
-	globalVar.aImagesPj[1] = loadImage("img/daveL.png"); /* le player de gauche */
+	globalVar.aImg_Minigames[0] = globalFunc.loadImage("img/shifumi.png"); /* shifumi */
 
-	globalVar.aImagesPnj[0] = loadImage("img/poulet_metal.png"); /* Poulet metal */
-	globalVar.aImagesPnj[1] = loadImage("img/poulet_garde.png"); /* Poulicier */
-	globalVar.aImagesPnj[2] = loadImage("img/poulet_forgeron.png"); /* poulet forgeron */
-	globalVar.aImagesPnj[3] = loadImage("img/poulet_base.png"); /* poulet basique */
+	globalVar.aImg_Pj[0] = globalFunc.loadImage("img/dave.png"); /* le player */
+
+	globalVar.aImg_Pnj[0] = globalFunc.loadImage("img/poulet_metal.png"); /* Poulet metal */
+	globalVar.aImg_Pnj[1] = globalFunc.loadImage("img/poulet_garde.png"); /* Poulicier */
+	globalVar.aImg_Pnj[2] = globalFunc.loadImage("img/poulet_forgeron.png"); /* poulet forgeron */
+	/*globalVar.aImg_Pnj[3] = globalFunc.loadImage("img/poulet_base.png");*/ /* poulet basique */
 	
-	globalVar.aImagesContent[0] = loadImage("img/seau.png"); /* seau */
-	globalVar.aImagesContent[1] = loadImage("img/fontaine_eau.png"); /* fontaine */
-	globalVar.aImagesContent[2] = loadImage("img/beurre.png"); /* beurre */
-	globalVar.aImagesContent[3] = loadImage("img/piece.png"); /* pièce */
-	globalVar.aImagesContent[4] = loadImage("img/huile.png"); /* huile */
+	globalVar.aImg_SceneContent[0] = globalFunc.loadImage("img/seau.png"); /* seau */
+	globalVar.aImg_SceneContent[1] = globalFunc.loadImage("img/fontaine_eau.png"); /* fontaine */
+	globalVar.aImg_SceneContent[2] = globalFunc.loadImage("img/beurre.png"); /* beurre */
+	globalVar.aImg_SceneContent[3] = globalFunc.loadImage("img/piece.png"); /* pièce */
+	globalVar.aImg_SceneContent[4] = globalFunc.loadImage("img/huile.png"); /* huile */
+
+	globalVar.aAudio[0] = globalFunc.loadAudio("audio/mainMusic.mp3"); /* musique */
 
 
-	globalVar.iCanvas_w = canvas.width = 1280; /* window.innerWidth; */
-	globalVar.iCanvas_h = canvas.height = 720; /* window.innerHeight; */
+	/* ****** la fenêtre de jeu ****** */
 
-	globalVar.iEchelle = globalVar.iCanvas_w / 1280;
-
-	globalVar.oDave = new Player(20, globalVar.iCanvas_h * 0.65);
-
-	globalVar.oScript = new Script();
-
-	/* les objets des minigames */
-	globalVar.oShifumi = new Shifumi(0);
+	globalVar.canvas = document.getElementById("canvas");
+	globalVar.context = globalVar.canvas.getContext("2d");
 
 
-	for(var i = 0; i < globalVar.aImagesContent.length; i++)
+	/* calcul de l'echelle, de manière à concerver le ratio */
+
+	if ((window.innerWidth / globalVar.aImg_Bg[0].width) < (window.innerHeight / globalVar.aImg_Bg[0].height))
 	{
-		globalVar.aSceneContent[i] = new SceneContent(i, i);
+		globalVar.iScale = window.innerWidth / globalVar.aImg_Bg[0].width;
+	}
+	else
+	{
+		globalVar.iScale = window.innerHeight / globalVar.aImg_Bg[0].height;
 	}
 
-	for(var i = 0; i < globalVar.aImagesPnj.length; i++)
+	globalVar.iCanvas_w = canvas.width = globalVar.aImg_Bg[0].width * globalVar.iScale;
+	globalVar.iCanvas_h = canvas.height = globalVar.aImg_Bg[0].height * globalVar.iScale;
+	
+
+	/* ****** les objets ****** */
+
+	globalVar.oDave = new Player(globalVar.aImg_Pj[0], 4, 20, 475, 130, 220);
+	globalVar.oShifumi = new Shifumi(globalVar.aImg_Minigames[0]);
+
+	for (var i = 0; i < globalVar.aImg_Bg.length; i++)
 	{
-		if (i == 3)
-		{
-			globalVar.aPnj[i] = new Pnj(i, i, false);
-		}
-		else
-		{
-			globalVar.aPnj[i] = new Pnj(i, i, true);
-		}
+		globalVar.aScene.push(new Scene(i, globalVar.aImg_Bg[i]));
+	}
+	for (var i = 0; i < globalVar.aImg_SceneContent.length; i++)
+	{
+		globalVar.aSceneContent.push(new SceneContent(i, globalVar.aImg_SceneContent[i]));
+	}
+	for (var i = 0; i < globalVar.aImg_Pnj.length + 4; i++) /* le '+x' c'est pour les pnj dont l'image n'est pas séparée du bg */
+	{
+		globalVar.aPnj.push(new Pnj(i, globalVar.aImg_Pnj[i]));
 	}
 
-	for(var i = 0; i < globalVar.aImagesScenes.length; i++)
-	{
-		globalVar.aScene[i] = new Scene(i, i);
-	}
+
+	/* ****** pour le mobile ****** */
 
 	canvas.addEventListener("touchstart", touchStartHandler, false);
 	canvas.addEventListener("touchend", touchEndHandler, false);
@@ -208,63 +294,4 @@ window.onload = function()
 	    	 tizen.application.getCurrentApplication().exit();
 	    }
 	});
-}
-
-/* --------------------------------- Functions --------------------------------- */
-
-function loadImage(sImageSrc)
-{
-	var img = new Image();
-	img.onload = isLoadedContent;
-	img.src = sImageSrc;
-	return img;
-}
-
-function loadAudio(sAudioSrc)
-{
-	var audio = new Audio();
-	audio.addEventListener("canplaythrough", isLoadedContent, false);
-	audio.src = sAudioSrc;
-	return audio;
-}
-
-function isLoadedContent()
-{
-	if (++globalVar.filesLoaded >=
-		(globalVar.aImagesContent.length
-		+ globalVar.aImagesScenes.length
-		+ globalVar.aImagesPnj.length
-		+ globalVar.aAudio.length))
-	{
-		run();
-	}
-}
-
-function collision(box1, box2)
-{
-	if ((box1[0] >= box2[0] + box2[2])
-	|| (box1[0] + box1[2] <= box2[0])
-	|| (box1[1] >= box2[1] + box2[3])
-	|| (box1[1] + box1[3] <= box2[1]))
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-function isButtonClicked(xywh)
-{
-	if ((globalVar.bMouseDown && globalVar.iMouse_x >= xywh[0] && globalVar.iMouse_x < xywh[0] + xywh[2])
-	&& (globalVar.iMouse_y >= xywh[1] && globalVar.iMouse_y < xywh[1] + xywh[3]))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-    
 }
