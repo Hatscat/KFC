@@ -19,7 +19,10 @@ if (!gVar.bMinigames)
 		if 	(!!gVar.aScene[gVar.iSceneNb].arrow_L) /* présence d'une flèche à gauche de la scene */
 		{
 			if ((gVar.aScene[gVar.iSceneNb].iMoveDir == -1)
-			||	(gVar.bCanClick && gFunc.isButtonClicked(gVar.aScene[gVar.iSceneNb].arrow_L) && !gVar.oDave.bAnim))
+			||	(gVar.bCanClick
+				&& gFunc.isButtonClicked(gVar.aScene[gVar.iSceneNb].arrow_L)
+				&& !gVar.oDave.bAnim
+				&& !gVar.oDave.bDialog))
 			{
 				gVar.bCanClick = false;
 				gVar.aScene[gVar.iSceneNb].iMoveDir = -1;
@@ -39,7 +42,10 @@ if (!gVar.bMinigames)
 		if (!!gVar.aScene[gVar.iSceneNb].arrow_R) /* présence d'une flèche à droite de la scene */
 		{
 			if 	((gVar.aScene[gVar.iSceneNb].iMoveDir == 1)
-			||	(gVar.bCanClick && gFunc.isButtonClicked(gVar.aScene[gVar.iSceneNb].arrow_R) && !gVar.oDave.bAnim))
+			||	(gVar.bCanClick
+				&& gFunc.isButtonClicked(gVar.aScene[gVar.iSceneNb].arrow_R)
+				&& !gVar.oDave.bAnim
+				&& !gVar.oDave.bDialog))
 			{
 				gVar.bCanClick = false;
 				gVar.aScene[gVar.iSceneNb].iMoveDir = 1;
@@ -105,7 +111,8 @@ if (!gVar.bMinigames)
 			if ((gVar.aSceneContent[i].iDropedState == 1)
 			||	(gFunc.isButtonClicked(gVar.aSceneContent[i].aBox)
 				&& gVar.aSceneContent[i].iDropedState == 0
-				&& !gVar.oDave.bAnim))
+				&& !gVar.oDave.bAnim
+				&& !gVar.oDave.bDialog))
 			{
 				gVar.aSceneContent[i].iDropedState = 1;
 				gVar.oDave.move(gVar.aSceneContent[i].aBox);
@@ -121,8 +128,13 @@ if (!gVar.bMinigames)
 			{
 				switch (gVar.aSceneContent[i].id)
 				{
-					case 1:
-						
+					//case 0: /* le seau */
+						//gVar.bMinigames = true;
+						//gVar.iMiniGameId = 0;
+					//break;
+					case 1: /* la fontaine */
+						gVar.bGoldCoin = true;
+						/* ********** */
 					break;
 					default :
 						gVar.aInventoryContent.push(new InventoryContent(gVar.aSceneContent[i].id, gVar.aSceneContent[i].img));
@@ -147,7 +159,8 @@ if (!gVar.bMinigames)
 			if ((gVar.aPnj[i].iInteractionState == 1)
 			||	(gFunc.isButtonClicked(gVar.aPnj[i].aBox)
 				&& gVar.aPnj[i].iInteractionState == 0
-				&& !gVar.oDave.bAnim))
+				&& !gVar.oDave.bAnim
+				&& !gVar.oDave.bDialog))
 			{
 				gVar.aPnj[i].iInteractionState = 1;
 				gVar.oDave.move(gVar.aPnj[i].aBox);
@@ -155,6 +168,7 @@ if (!gVar.bMinigames)
 				if (gFunc.collision(gVar.aPnj[i].aBox, gVar.oDave.aBox))
 				{	
 					gVar.aPnj[i].iInteractionState = 2;
+					gVar.oDave.bDialog = true;
 					gVar.oDave.bAnim = false;
 					gVar.oDave.iAnim = 0;
 				}
@@ -168,88 +182,17 @@ if (!gVar.bMinigames)
 					gVar.bCanClick = false;
 					gVar.aPnj[i].iDialog_state++;
 				}
+			}
+			else if (gVar.aPnj[i].iInteractionState == 3) /* dernière phrase */
+			{
+				gVar.aPnj[i].dialog();
 
-				if (!gFunc.collision(gVar.aPnj[i].aBox, gVar.oDave.aBox))
-				{	
+				if (gVar.bCanClick && gVar.bMouseDown)
+				{
+					gVar.bCanClick = false;
+					gVar.oDave.bDialog = false;
 					gVar.aPnj[i].iInteractionState = 0;
 				}
-
-				// switch (gVar.aPnj[i].id)
-				// {
-				// 	case 0 : /* poulet_metal */
-				// 		oDialog.draw("poulet_metal", 0);
-				// 	break;
-				// 	case 1 : /* poulet_garde */
-				// 		this.iSceneNb = 0;
-				// 		this.sx = 700;
-				// 		this.sy = 480;
-				// 		this.frameAmount = 0;
-				// 	break;
-				// 	case 2 : /* poulet_forgeron */
-				// 		this.iSceneNb = 3;
-				// 		this.sx = 600;
-				// 		this.sy = 470;
-				// 		this.frameAmount = 3;
-				// 	break;
-				// 	case 3 : /* Aubergiste ------- sans image */
-				// 		this.iSceneNb = 0;
-				// 		this.sx = 232;
-				// 		this.sy = 413;
-				// 		this.sw = 125;
-				// 		this.sh = 195;
-				// 	break;
-				// 	case 4 : /* poulet_final ------- sans image */
-				// 		this.iSceneNb = 5;
-				// 		this.sx = 497;
-				// 		this.sy = 549;
-				// 		this.sw = 125;
-				// 		this.sh = 195;
-				// 	break;
-
-				// 	case 0 :
-				// 		gVar.oScript.draw(["Hey! T’as l’air d’un métalleux !",
-				// 							" Et en plus t’es un humain !"," Ca me rapelle LA prophéthie !",
-				// 							" - La prophétie ?"," - La prophétie !",
-				// 							" - Va droit au but.",
-				// 							" - La prophétie dit qu’un humain viendra renverser le tyrannique roi Chickwings et blabla...",
-				// 							" retablir la paix, l’harmonie blabla… ","- En gros je dois lui botter le cul ?!",
-				// 							" -Ouais, c’est à peut près ça"], 30, 50);
-				// 	break;
-				// 	case 1 :
-				// 		gVar.oScript.draw(["Les humains doivent mourir pour la gloire du grand roi Chickwings ! ",
-				// 							"Je vais :rotte: te :hic: tuer ! "], 30, 50);
-				// 	break;
-				// 	case 2 : /*Forgeron*/
-				// 		//Si Horloge changée (var globale)
-				// 			gVar.oScript.draw(["Tu veux qu'on se tire l'oreille ?"], 30, 50);
-				// 			//Déclenchment Baston verbale
-				// 		//Sinon
-				// 			//gVar.oScript.draw(["Je suis en pause, c’est pas l’heure de bosser !"], 50, 50);
-				// 	break;
-				// 	case 3 : /*Tavernier*/
-				// 		//Si Po (variable globale Po (pièce d'or de la fontaine)
-				// 			gVar.oScript.draw(["Alors comme ça tu as un Poulet d'Or et tu voudrais m'acheter cette huile ?"], 30, 50);
-				// 			// Déclenchement Négoce
-				// 		//Sinon
-				// 			/*gVar.oScript.draw(["Ah ! Merci de m’avoir débarassé de cet ivrogne !",
-				// 				" J’ai pas grand chose à te filer étant donné que t’as déjà bu trois bières à l’oeil,",
-				// 				" mais tiens, prend… heuh… Cette plaquette de beurre! Le gras, c’est la vie"], 50, 50);*/
-				// 	break;
-				// 	case 4 :
-				// 		//Si huile bouillante
-				// 			//jette huile bouillante
-				// 		//Sinon
-				// 			gVar.oScript.draw(["Dégage minus !"], 30, 50);
-				// 			//gVar.oScript.draw(["[marmonne] J’en ferais bien des chicken wings de ce type là..."], 50, 50);
-				// 	break;
-				// 	case 5 :
-				// 		//Si Po (variable globale Po (pièce d'or de la fontaine)
-				// 			gVar.oScript.draw(["La vue de cette fontaine me rajeuni d’au moins 10 ans"],30, 50);
-				// 		//Sinon
-				// 			//gVar.oScript.draw(["Ah… J’ai un Poulet d’Or, je sais pas quoi en faire. ",
-				// 				//"-Bah file le moi ! ","-..."], 50, 50);
-				// 	break;
-				// }
 			}
 		}
 	}
@@ -277,7 +220,7 @@ else
 			gVar.oShimumi.run();
 		break;
 		case 1:
-
+			gVar.oTalkFight.run();
 		break;
 		case 2:
 
@@ -289,23 +232,28 @@ else
 
 if (gVar.bMouseDown)
 {
+	var gradient = gVar.context.createRadialGradient(
+		gVar.iMouse_x, gVar.iMouse_y, 10 * gVar.iScale, gVar.iMouse_x, gVar.iMouse_y, 80 * gVar.iScale);
+	gradient.addColorStop(0,"#ff0");
+	gradient.addColorStop(1,"#ffc");
 
 	gVar.context.globalAlpha = 0.5;
-	gVar.context.fillStyle = "#ff5";
+	gVar.context.fillStyle = gradient;
 
 	gVar.context.beginPath();
-	gVar.context.arc(gVar.iMouse_x, gVar.iMouse_y, 60 * gVar.iScale, 0, Math.PI * 2 , 0);
+	gVar.context.arc(gVar.iMouse_x, gVar.iMouse_y, 80 * gVar.iScale, 0, Math.PI * 2 , 0);
 	gVar.context.closePath();
 	gVar.context.fill();
 }
 
 /* affichage de la position du curseur à la pause pour le debug */
 
-if (gVar.bPause)
+if (gVar.bDebug)
 {
+	var iCursorSize = 20 * gVar.iScale;
 	gVar.context.globalAlpha = 1;
 	gVar.context.fillStyle = "#00f";
-	gVar.context.fillRect(gVar.iMouse_x, gVar.iMouse_y, 20 * gVar.iScale, 20 * gVar.iScale);
+	gVar.context.fillRect(gVar.iMouse_x - iCursorSize * 0.5, gVar.iMouse_y - iCursorSize * 0.5, iCursorSize, iCursorSize);
 }
 
 

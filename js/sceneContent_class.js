@@ -34,7 +34,7 @@ var SceneContent = function(id, img)
 
 	this.draw = function()
 	{
-		if (globalVar.bPause)  /* pour le debug */
+		if (globalVar.bDebug)  /* pour le debug */
 		{
 			globalVar.context.globalAlpha = 1;
 			globalVar.context.strokeStyle = "#fff"; 

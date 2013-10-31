@@ -1,15 +1,16 @@
 /* --------------------------------- Minigames Class --------------------------------- */
 
-var Shifumi = function(img) {
-
+var Shifumi = function(img)
+{
 	this.img = img;
+
+	this.iState = 0; /* pour TOUT les minijeux : this.iState == -1 s'il est terminé et réussit, sinon -2 en cas d'échec */
 
 	this.sw = this.img.width;
 	this.sh = this.img.height;
 
 	this.iSigneCheval = 0;
 	this.iPlayerSign = 0;
-	this.iState = 0;
 
 	this.pierre_rect = [20 * globalVar.iScale, 20 * globalVar.iScale, 100 * globalVar.iScale, 30 * globalVar.iScale];
 	this.feuille_rect = [220 * globalVar.iScale, 20 * globalVar.iScale, 100 * globalVar.iScale, 30 * globalVar.iScale];
@@ -63,4 +64,14 @@ var Shifumi = function(img) {
 		globalVar.context.drawImage(this.img, 0, 0, this.sw, this.sh, 0, 0, globalVar.iCanvas_w, globalVar.iCanvas_h);
 	}
 
+}
+
+var TalkFight = function(img) /* baston verbale */
+{
+	this.img = img;
+
+	this.iState = 0; /* pour TOUT les minijeux : this.iState == -1 s'il est terminé et réussit, sinon -2 en cas d'échec */
+
+	// this.sw = this.img.width;
+	// this.sh = this.img.height;
 }

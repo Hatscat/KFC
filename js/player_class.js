@@ -22,8 +22,9 @@ var Player = function(img, frames, x, y, w, h)
 	this.iOrigin_x = 0;
 	this.iMiddleDistance = 0;
 	this.bAnim = false;
+	this.bDialog = false;
 	this.iAnim = 0;
-	this.bOrientation = 1; /* 1 == droite, -1 == gauche */
+	this.iOrientation = 1; /* 1 == droite, -1 == gauche */
 
 	this.move = function(aTarget_box)
 	{
@@ -31,12 +32,12 @@ var Player = function(img, frames, x, y, w, h)
 
 		if (aTarget_box[0] + aTarget_box[2] * 0.5 < this.x + this.w * 0.5) /* la cible est à gauche du joueur */
 		{
-			this.bOrientation = -1;
+			this.iOrientation = -1;
 			iDistance_x = Math.abs((aTarget_box[0] + aTarget_box[2]) - this.x);
 		}
 		else
 		{
-			this.bOrientation = 1;
+			this.iOrientation = 1;
 			iDistance_x = Math.abs(aTarget_box[0] - (this.x + this.w));
 		}
 
@@ -54,7 +55,7 @@ var Player = function(img, frames, x, y, w, h)
 			iSpeedVariance =  (this.iMiddleDistance / iDistance_x + 0.25);
 			if (iSpeedVariance >= 1)
 			{
-				iSpeedVariance = 0.7;
+				iSpeedVariance = 0.6;
 			}
 		}
 		else if (iDistance_x < this.w) /* decceleration */
@@ -66,23 +67,15 @@ var Player = function(img, frames, x, y, w, h)
 			iSpeedVariance =  1;
 		}
 
-		this.x += iSpeed * this.bOrientation * iSpeedVariance;
+		this.x += iSpeed * this.iOrientation * iSpeedVariance;
 
 		this.bAnim = true;
 		this.aBox[0] = this.x;
-
-		/*
-		if (iDistance_x < 6 * globalVar.iScale)
-		{
-			this.bAnim = false;
-			this.iAnim = 0;
-		}
-		*/
 	}
 
 	this.draw = function()
 	{
-		if (globalVar.bPause) /* pour le debug */
+		if (globalVar.bDebug) /* pour le debug */
 		{
 			globalVar.context.globalAlpha = 1;
 			globalVar.context.strokeStyle = "#fff"; 
@@ -103,7 +96,7 @@ var Player = function(img, frames, x, y, w, h)
 		}
 
 		globalVar.context.globalAlpha = 1;
-		if (this.bOrientation) /* tourné vers la droite */
+		if (this.iOrientation == 1) /* tourné vers la droite */
 		{
 			globalVar.context.drawImage(this.img, this.iAnim * this.sw, 0, this.sw, this.sh, this.x, this.y, this.w, this.h);
 		}

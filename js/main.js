@@ -24,6 +24,7 @@ var globalVar = {
 
 	oDave: null,
 	oShifumi: null,
+	oTalkFight: null,
 
 	iFilesLoaded: 0,
 	iFrame: 0,
@@ -41,7 +42,12 @@ var globalVar = {
 	bCanClick: true,
 	bFingerSlide: false,
 	bMinigames: false,
+	bDebug: false,
 	bPause: false,
+	bClockChanged: false,
+	bGoldCoin: false,
+	bGoldenChicken: false,
+	bBoilingOil: false,
 
 	// drawPath: [],
 	aImg_Pj: [],
@@ -87,7 +93,7 @@ var globalFunc = {
 			+	globalVar.aImg_SceneContent.length
 			+	globalVar.aAudio.length))
 		{
-			run();
+			init();
 		}
 	},
 
@@ -151,9 +157,14 @@ window.onkeydown = function(event)
 {
 	if (event.keyCode == 32) /* space button */
 	{
+		globalVar.bDebug = !globalVar.bDebug;
+	}
+	else if (event.keyCode == 80) /* P button */	
+	{
 		globalVar.bPause = !globalVar.bPause;
+		globalVar.bDebug = !globalVar.bDebug;
 		run();
-	}	
+	}
 }
 
 /* --------------------------------- Touch Events --------------------------------- */
@@ -212,7 +223,7 @@ function touchEndHandler()
 
 /* --------------------------------- Initialization --------------------------------- */
 
-window.onload = function()
+window.onload = function() /* phase 1/2 */
 {
 	/* ****** chargement des images et des sons ****** */
 
@@ -226,7 +237,7 @@ window.onload = function()
 
 	globalVar.aImg_Pj[0] = globalFunc.loadImage("img/dave.png"); /* le player */
 
-	globalVar.aImg_Pnj[0] = globalFunc.loadImage("img/poulet_metal.png"); /* Poulet metal */
+	globalVar.aImg_Pnj[0] = globalFunc.loadImage("img/poulet_metal_L.png"); /* Poulet metal */
 	globalVar.aImg_Pnj[1] = globalFunc.loadImage("img/poulet_garde.png"); /* Poulicier */
 	globalVar.aImg_Pnj[2] = globalFunc.loadImage("img/poulet_forgeron.png"); /* poulet forgeron */
 	/*globalVar.aImg_Pnj[3] = globalFunc.loadImage("img/poulet_base.png");*/ /* poulet basique */
@@ -239,7 +250,10 @@ window.onload = function()
 
 	globalVar.aAudio[0] = globalFunc.loadAudio("audio/mainMusic.mp3"); /* musique */
 
+}
 
+function init() /* phase 2/2 */
+{
 	/* ****** la fenêtre de jeu ****** */
 
 	globalVar.canvas = document.getElementById("canvas");
@@ -265,6 +279,8 @@ window.onload = function()
 
 	globalVar.oDave = new Player(globalVar.aImg_Pj[0], 4, 20, 475, 130, 220);
 	globalVar.oShifumi = new Shifumi(globalVar.aImg_Minigames[0]);
+	globalVar.oTalkFight = new TalkFight(null);
+
 
 	for (var i = 0; i < globalVar.aImg_Bg.length; i++)
 	{
@@ -294,4 +310,6 @@ window.onload = function()
 	    	 tizen.application.getCurrentApplication().exit();
 	    }
 	});
+
+	run(); /* go! */
 }

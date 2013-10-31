@@ -69,7 +69,7 @@ var Scene = function(id, img)
 		globalVar.context.drawImage(this.img, 0, 0, this.sw, this.sh, 0, 0, globalVar.iCanvas_w, globalVar.iCanvas_h);
 
 		
-		if (globalVar.bPause) /* pour le debug */
+		if (globalVar.bDebug) /* pour le debug */
 		{
 			if (!!this.arrow_L)
 			{

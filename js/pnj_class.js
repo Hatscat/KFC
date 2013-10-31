@@ -75,7 +75,7 @@ var Pnj = function(id, img)
 
 	this.draw = function()
 	{
-		if (globalVar.bPause) /* pour le debug */
+		if (globalVar.bDebug) /* pour le debug */
 		{
 			globalVar.context.globalAlpha = 1;
 			globalVar.context.strokeStyle = "#fff"; 
@@ -103,6 +103,8 @@ var Pnj = function(id, img)
 
 	this.dialog = function()
 	{	
+		this.bDialog = true;
+		
 		var aDialog_box = [0, 140 * globalVar.iScale, globalVar.iCanvas_w, 80 * globalVar.iScale];
 		var iDialog_x = globalVar.iCanvas_w * 0.5;
 		var iDialog_y = 195 * globalVar.iScale;
@@ -156,7 +158,138 @@ var Pnj = function(id, img)
 						globalVar.context.fillText("Ouais, c’est à peut près ça.", iDialog_x, iDialog_y);
 					break;
 					default :
+						this.iInteractionState = 3;
 						globalVar.context.fillText("...", iDialog_x, iDialog_y);
+					break;
+				}
+			break;
+			case 1 : /* poulet_garde */
+				switch (this.iDialog_state % 3)
+				{
+					case 0 :
+						globalVar.context.fillText("Les humains doivent mourir...", iDialog_x, iDialog_y);
+					break;
+					case 1 :
+						globalVar.context.fillText("...pour la gloire du grand roi Chickwings !", iDialog_x, iDialog_y);
+					break;
+					default :
+						this.iInteractionState = 3;
+						globalVar.context.fillText("Je vais *rotte* te *hic* tuer !", iDialog_x, iDialog_y);
+					break;
+				}
+			break;
+			case 2 : /* poulet_forgeron */
+				switch (this.iDialog_state)
+				{
+					default :
+						this.iInteractionState = 3;
+						if (globalVar.bClockChanged && globalVar.oTalkFight.iState > -1) /* baston ! */
+						{
+							globalVar.context.fillText("Tu veux qu'on se tire l'oreille ?", iDialog_x, iDialog_y);
+							/* ******************* */
+						}
+						else if (globalVar.bClockChanged && globalVar.oTalkFight.iState == -1) /* à déjà gagné */
+						{
+							globalVar.context.fillText("hmpf...");
+						}
+						else
+						{
+							globalVar.context.fillText("Je suis en pause, c’est pas l’heure de bosser !", iDialog_x, iDialog_y);
+						}
+					break;
+				}
+			break;
+			case 3 : /* Aubergiste */
+				if (globalVar.bGoldenChicken)
+				{
+					switch (this.iDialog_state)
+					{
+						case 0 :
+							globalVar.context.fillText("Alors comme ça tu as un Poulet d'Or...", iDialog_x, iDialog_y);
+						break;
+						case 1 :
+							globalVar.context.fillText("...et tu voudrais m'acheter cette huile ?", iDialog_x, iDialog_y);
+						break;
+						case 2 :
+							globalVar.context.fillText("Ah ! Merci de m’avoir débarassé de cet ivrogne !", iDialog_x, iDialog_y);
+						break;
+						case 3 :
+							globalVar.context.fillText("J’ai pas grand chose à te filer...", iDialog_x, iDialog_y);
+						break;
+						case 4 :
+							globalVar.context.fillText("...étant donné que t’as déjà bu trois bières à l’oeil,", iDialog_x, iDialog_y);
+						break;
+						case 5 :
+							globalVar.context.fillText("...mais tiens, prend...", iDialog_x, iDialog_y);
+						break;
+						case 6 :
+							globalVar.context.fillText("...heuh...", iDialog_x, iDialog_y);
+						break;
+						case 7 :
+							globalVar.context.fillText("...Cette plaquette de beurre !", iDialog_x, iDialog_y);
+						break;
+						default :
+							this.iInteractionState = 3;
+							globalVar.context.fillText("Le gras, c’est la vie !", iDialog_x, iDialog_y);
+						break;
+					}
+				}
+				else
+				{
+					this.iDialog_state = 0;
+					this.iInteractionState = 3;
+					globalVar.context.fillText("hmpf...", iDialog_x, iDialog_y);
+				}
+			break;
+			case 4 : /* poulet_au_bar */
+				switch (this.iDialog_state)
+				{
+					default :
+						this.iInteractionState = 3;
+						globalVar.context.fillText("* hips *", iDialog_x, iDialog_y);
+					break;
+				}
+			break;
+			case 5 : /* poulet_blanc */
+				switch (this.iDialog_state)
+				{
+					case 0 :
+						globalVar.context.fillText("Ah… J’ai un Poulet d’Or, je sais pas quoi en faire.", iDialog_x, iDialog_y);
+					break;
+					case 1 :
+						globalVar.context.fillText("\"- Bah file le moi !\"", iDialog_x, iDialog_y);
+					break;
+					default :
+						this.iInteractionState = 3;
+						if (globalVar.bGoldCoin)
+						{
+							globalVar.context.fillText("La vue de cette fontaine me rajeuni d’au moins 10 ans", iDialog_x, iDialog_y);
+						}
+						else
+						{
+							globalVar.context.fillText("...", iDialog_x, iDialog_y);
+						}
+					break;
+				}
+			break;
+			case 6 : /* poulet_final */
+				switch (this.iDialog_state % 5)
+				{
+					case 4 :
+						globalVar.context.fillText("[marmonne] J’en ferais bien des chicken wings de celui là...", iDialog_x, iDialog_y);
+					break;
+					default :
+						this.iInteractionState = 3;
+						if (globalVar.bBoilingOil)
+						{
+							/* *************** */
+							globalVar.context.fillText("AaaAarRGg !", iDialog_x, iDialog_y);
+							globalVar.iHistoryState++;
+						}
+						else
+						{
+							globalVar.context.fillText("Dégage minus !", iDialog_x, iDialog_y);
+						}
 					break;
 				}
 			break;
