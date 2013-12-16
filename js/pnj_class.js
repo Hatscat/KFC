@@ -37,10 +37,10 @@ var Pnj = function(id, img)
 		break;
 		case 4 : /* poulet_au_bar ------- sans image 2 */
 			this.iSceneNb = 0;
-			this.sx = 540;
-			this.sy = 325;
-			this.sw = 110;
-			this.sh = 250;
+			this.sx = 560;
+			this.sy = 400;
+			this.sw = 80;
+			this.sh = 150;
 		break;
 		case 5 : /* poulet_blanc ------- sans image 3 */
 			this.iSceneNb = 2;

@@ -1,0 +1,1 @@
+Hey! It's a free and open sources software under the MIT License (see the "COPYING" file), have fun !

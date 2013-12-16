@@ -162,7 +162,6 @@ window.onkeydown = function(event)
 	else if (event.keyCode == 80) /* P button */	
 	{
 		globalVar.bPause = !globalVar.bPause;
-		globalVar.bDebug = !globalVar.bDebug;
 		run();
 	}
 }

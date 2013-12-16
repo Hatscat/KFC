@@ -191,6 +191,7 @@ if (!gVar.bMinigames)
 				{
 					gVar.bCanClick = false;
 					gVar.oDave.bDialog = false;
+					gVar.aPnj[i].iDialog_state++;
 					gVar.aPnj[i].iInteractionState = 0;
 				}
 			}
