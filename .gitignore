@@ -1,9 +1,11 @@
+*.wgt
+
 #################
 ## Eclipse
 #################
 
 *.pydevproject
-.project
+#.project
 .metadata
 bin/
 tmp/
